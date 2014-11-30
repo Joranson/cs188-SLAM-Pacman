@@ -18,6 +18,8 @@ import util
 import random
 import game
 import slam
+from game import Directions
+
 
 class InferenceModule:
     """
@@ -69,7 +71,7 @@ class SLAMParticleFilter(InferenceModule):
     Particle filtering inference module for use in SLAM.
     """
     
-    "*** YOU MAY ADD WHATEVER HELPER METHODS YOU WANT TO THIS CLASS ***"
+    "*** YOU MAY ADD WHATEVER HELPER METHODS YOU WANT TO THIS CLASS ***"    
     
     def __init__(self, startPos, layoutWidth, layoutHeight, wallPrior, legalPositions, numParticles=500):
         "*** YOU OVERWRITE THIS METHOD HOWEVER YOU WANT ***"
@@ -94,7 +96,7 @@ class SLAMParticleFilter(InferenceModule):
         "*** YOU OVERWRITE THIS METHOD HOWEVER YOU WANT ***"
         pass
         
-    def inRange(direction, pos):
+    def inRange(self, direction, pos):
         if direction==Directions.NORTH:
             if (pos[1]+1) in range(self.layoutHeight+1):
                 return True
@@ -121,36 +123,39 @@ class SLAMParticleFilter(InferenceModule):
         if self.time==0:
             print prevAction
         self.time += 1
-        from game import Directions
 
         ## iterate through all possible pacman positions, vague
         for p in self.legalPositions:
             center = self.pos[p]
             if prevAction==Directions.NORTH:
-                if inRange(Directions.NORTH, p):
-                    newPos=p
+                if self.inRange(Directions.NORTH, p):
+                    newPos=list(p)
                     newPos[1]+=1
+                    newPos=tuple(newPos)
                     self.pos[newPos] = self.pos[p] * 0.9
                 else:
                     self.pos[p] += center * 0.9
 
-                if inRange(Directions.SOUTH, p):
-                    newPos=p
+                if self.inRange(Directions.SOUTH, p):
+                    newPos=list(p)
                     newPos[1]-=1
+                    newPos=tuple(newPos)
                     self.pos[newPos] = center * 0.025
                 else:
                     self.pos[p] += center*0.025
 
-                if inRange(Directions.WEST, p):
-                    newPos=p
+                if self.inRange(Directions.WEST, p):
+                    newPos=list(p)
                     newPos[0]-=1
+                    newPos=tuple(newPos)
                     self.pos[newPos] = center * 0.025
                 else:
                     self.pos[p] += center*0.025
 
-                if inRange(Directions.EAST, p):
-                    newPos=p
+                if self.inRange(Directions.EAST, p):
+                    newPos=list(p)
                     newPos[0]+=1
+                    newPos=tuple(newPos)
                     self.pos[newPos] = center * 0.025
                 else:
                     self.pos[p] += center*0.025
@@ -158,30 +163,34 @@ class SLAMParticleFilter(InferenceModule):
                 self.pos[p] += center*0.025
 
             elif prevAction==Directions.SOUTH:
-                if inRange(Directions.NORTH, p):
-                    newPos=p
+                if self.inRange(Directions.NORTH, p):
+                    newPos=list(p)
                     newPos[1]+=1
+                    newPos=tuple(newPos)
                     self.pos[newPos] = center * 0.025
                 else:
                     self.pos[p] += center * 0.025
 
-                if inRange(Directions.SOUTH, p):
-                    newPos=p
+                if self.inRange(Directions.SOUTH, p):
+                    newPos=list(p)
                     newPos[1]-=1
+                    newPos=tuple(newPos)
                     self.pos[newPos] = self.pos[p] * 0.9
                 else:
                     self.pos[p] += center * 0.9
 
-                if inRange(Directions.WEST, p):
-                    newPos=p
+                if self.inRange(Directions.WEST, p):
+                    newPos=list(p)
                     newPos[0]-=1
+                    newPos=tuple(newPos)
                     self.pos[newPos] = center * 0.025
                 else:
                     self.pos[p] += center*0.025
 
-                if inRange(Directions.EAST, p):
-                    newPos=p
+                if self.inRange(Directions.EAST, p):
+                    newPos=list(p)
                     newPos[0]+=1
+                    newPos=tuple(newPos)
                     self.pos[newPos] = center * 0.025
                 else:
                     self.pos[p] += center*0.025
@@ -189,30 +198,34 @@ class SLAMParticleFilter(InferenceModule):
                 self.pos[p] += center*0.025
 
             elif prevAction==Directions.WEST:
-                if inRange(Directions.NORTH, p):
-                    newPos=p
+                if self.inRange(Directions.NORTH, p):
+                    newPos=list(p)
                     newPos[1]+=1
+                    newPos=tuple(newPos)
                     self.pos[newPos] = center * 0.025
                 else:
                     self.pos[p] += center * 0.025
 
-                if inRange(Directions.SOUTH, p):
-                    newPos=p
+                if self.inRange(Directions.SOUTH, p):
+                    newPos=list(p)
                     newPos[1]-=1
+                    newPos=tuple(newPos)
                     self.pos[newPos] = center * 0.025
                 else:
                     self.pos[p] += center * 0.025
 
-                if inRange(Directions.WEST, p):
-                    newPos=p
+                if self.inRange(Directions.WEST, p):
+                    newPos=list(p)
                     newPos[0]-=1
+                    newPos=tuple(newPos)
                     self.pos[newPos] = self.pos[p] * 0.9
                 else:
                     self.pos[p] += center * 0.9
 
-                if inRange(Directions.EAST, p):
-                    newPos=p
+                if self.inRange(Directions.EAST, p):
+                    newPos=list(p)
                     newPos[0]+=1
+                    newPos=tuple(newPos)
                     self.pos[newPos] = center * 0.025
                 else:
                     self.pos[p] += center*0.025
@@ -220,30 +233,34 @@ class SLAMParticleFilter(InferenceModule):
                 self.pos[p] += center*0.025
 
             elif prevAction==Directions.EAST:
-                if inRange(Directions.NORTH, p):
-                    newPos=p
+                if self.inRange(Directions.NORTH, p):
+                    newPos=list(p)
                     newPos[1]+=1
+                    newPos=tuple(newPos)
                     self.pos[newPos] = center * 0.025
                 else:
                     self.pos[p] += center * 0.025
 
-                if inRange(Directions.SOUTH, p):
-                    newPos=p
+                if self.inRange(Directions.SOUTH, p):
+                    newPos=list(p)
                     newPos[1]-=1
+                    newPos=tuple(newPos)
                     self.pos[newPos] = center * 0.025
                 else:
                     self.pos[p] += center * 0.025
 
-                if inRange(Directions.WEST, p):
-                    newPos=p
+                if self.inRange(Directions.WEST, p):
+                    newPos=list(p)
                     newPos[0]-=1
+                    newPos=tuple(newPos)
                     self.pos[newPos] = center * 0.025
                 else:
                     self.pos[p] += center * 0.025
 
-                if inRange(Directions.EAST, p):
-                    newPos=p
+                if self.inRange(Directions.EAST, p):
+                    newPos=list(p)
                     newPos[0]+=1
+                    newPos=tuple(newPos)
                     self.pos[newPos] = self.pos[p] * 0.9
                 else:
                     self.pos[p] += center * 0.9
@@ -251,30 +268,34 @@ class SLAMParticleFilter(InferenceModule):
                 self.pos[p] += center*0.025
 
             else:
-                if inRange(Directions.NORTH, p):
-                    newPos=p
+                if self.inRange(Directions.NORTH, p):
+                    newPos=list(p)
                     newPos[1]+=1
+                    newPos=tuple(newPos)
                     self.pos[newPos] = center * 0.025
                 else:
                     self.pos[p] += center * 0.025
 
-                if inRange(Directions.SOUTH, p):
-                    newPos=p
+                if self.inRange(Directions.SOUTH, p):
+                    newPos=list(p)
                     newPos[1]-=1
+                    newPos=tuple(newPos)
                     self.pos[newPos] = center * 0.025
                 else:
                     self.pos[p] += center * 0.025
 
-                if inRange(Directions.WEST, p):
-                    newPos=p
+                if self.inRange(Directions.WEST, p):
+                    newPos=list(p)
                     newPos[0]-=1
+                    newPos=tuple(newPos)
                     self.pos[newPos] = center * 0.025
                 else:
                     self.pos[p] += center * 0.025
 
-                if inRange(Directions.EAST, p):
-                    newPos=p
+                if self.inRange(Directions.EAST, p):
+                    newPos=list(p)
                     newPos[0]+=1
+                    newPos=tuple(newPos)
                     self.pos[newPos] = center * 0.025
                 else:
                     self.pos[p] += center * 0.025
@@ -284,12 +305,12 @@ class SLAMParticleFilter(InferenceModule):
 
         ## update walls based on range, further degrade possibilities if pacman position collides with wall position
         for p in self.legalPositions:
-            center = self.pos[p]
-            for i range(p[0]-ranges[3]+1, self.startPos[0]+ranges[1])
-
-        for i in range(self.startPos[0]-ranges[3]+1, self.startPos[0]+ranges[1]):
-            for j in range(self.startPos[1]-ranges[2]+1, self.startPos[1]+ranges[0]):
-                self.wall[(i,j)]=0
+            pacman_position_p = self.pos[p]
+            for i in range(4):
+                # print "range r:----------->", r
+                dist = slam.getObservationDistribution(ranges[i])
+                if i == 0:
+                    
        
             # self.wall[p] *= (self.wallPrior/(1-self.wallPrior)) * p(m[i][j] | zt, xt)/(1-p(m[i][j] | zt, xt)
 
