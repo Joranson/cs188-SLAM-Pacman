@@ -86,6 +86,7 @@ class SLAMParticleFilter(InferenceModule):
                 
     def observe(self, prevAction, ranges):
         "*** YOU OVERWRITE THIS METHOD HOWEVER YOU WANT ***"
+        print prevAction
         pass
     
     def getWallBeliefDistribution(self):
