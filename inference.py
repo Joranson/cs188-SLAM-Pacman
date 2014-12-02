@@ -86,8 +86,8 @@ class SLAMParticleFilter(InferenceModule):
         self.wall = util.Counter()
         for p in legalPositions:
             self.pos[p] = 0
-            self.wall[p] = 1
-        self.pos[startPos] = 1
+            self.wall[p] = 1.0
+        self.pos[startPos] = 1.0
         self.wall[startPos] = 0
         self.time = 0
 
@@ -120,8 +120,8 @@ class SLAMParticleFilter(InferenceModule):
     def observe(self, prevAction, ranges):
         "*** YOU OVERWRITE THIS METHOD HOWEVER YOU WANT ***"
         # pass
-        if self.time==0:
-            print prevAction
+        # if self.time==0:
+        #     print prevAction
         self.time += 1
 
         ## iterate through all possible pacman positions, vague
@@ -310,8 +310,27 @@ class SLAMParticleFilter(InferenceModule):
                 # print "range r:----------->", r
                 dist = slam.getObservationDistribution(ranges[i])
                 if i == 0:
-                    
-       
+                    wallpos = (p[0],p[1]+ranges[0])
+                    print self.wall[wallpos]
+                    self.wall[wallpos] *= (self.wallPrior/(1-self.wallPrior)) * (dist/(1-dist))
+                    if self.pos[wallpos] == 0:
+                        self.pos[wallpos] = 1-self.wall[wallpos]
+                elif i == 1:
+                    wallpos = (p[0]+ranges[1],p[1])
+                    self.wall[wallpos] *= (self.wallPrior/(1-self.wallPrior)) * (dist/(1-dist))
+                    if self.pos[wallpos] == 0:
+                        self.pos[wallpos] = 1-self.wall[wallpos]
+                elif i == 2:
+                    wallpos = (p[0],p[1]-ranges[2])
+                    self.wall[wallpos] *= (self.wallPrior/(1-self.wallPrior)) * (dist/(1-dist))
+                    if self.pos[wallpos] == 0:
+                        self.pos[wallpos] = 1-self.wall[wallpos]
+                elif i == 3:
+                    wallpos = (p[0]-ranges[3],p[0])
+                    self.wall[wallpos] *= (self.wallPrior/(1-self.wallPrior)) * (dist/(1-dist))
+                    if self.pos[wallpos] == 0:
+                        self.pos[wallpos] = 1-self.wall[wallpos]
+
             # self.wall[p] *= (self.wallPrior/(1-self.wallPrior)) * p(m[i][j] | zt, xt)/(1-p(m[i][j] | zt, xt)
 
     
@@ -332,3 +351,5 @@ class SLAMParticleFilter(InferenceModule):
         # beliefs.normalize()
         # print beliefs
         return self.pos
+
+
