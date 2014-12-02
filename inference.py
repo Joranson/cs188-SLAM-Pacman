@@ -309,28 +309,32 @@ class SLAMParticleFilter(InferenceModule):
             for i in range(4):
                 # print "range r:----------->", r
                 dist = slam.getObservationDistribution(ranges[i])
+                print dist
                 if i == 0:
                     wallpos = (p[0],p[1]+ranges[0])
-                    print self.wall[wallpos]
-                    self.wall[wallpos] *= (self.wallPrior/(1-self.wallPrior)) * (dist/(1-dist))
+                    # print self.wall[wallpos]
+                    # print (self.wallPrior/(1-self.wallPrior)) * (dist/(1-dist))
+                    self.wall[wallpos] *= (self.wallPrior/(1-self.wallPrior)) * (dist[ranges[i]]/(1-dist[ranges[i]]))
+
                     if self.pos[wallpos] == 0:
                         self.pos[wallpos] = 1-self.wall[wallpos]
                 elif i == 1:
                     wallpos = (p[0]+ranges[1],p[1])
-                    self.wall[wallpos] *= (self.wallPrior/(1-self.wallPrior)) * (dist/(1-dist))
+                    self.wall[wallpos] *= (self.wallPrior/(1-self.wallPrior)) * (dist[ranges[i]]/(1-dist[ranges[i]]))
                     if self.pos[wallpos] == 0:
                         self.pos[wallpos] = 1-self.wall[wallpos]
                 elif i == 2:
                     wallpos = (p[0],p[1]-ranges[2])
-                    self.wall[wallpos] *= (self.wallPrior/(1-self.wallPrior)) * (dist/(1-dist))
+                    self.wall[wallpos] *= (self.wallPrior/(1-self.wallPrior)) * (dist[ranges[i]]/(1-dist[ranges[i]]))
                     if self.pos[wallpos] == 0:
                         self.pos[wallpos] = 1-self.wall[wallpos]
                 elif i == 3:
                     wallpos = (p[0]-ranges[3],p[0])
-                    self.wall[wallpos] *= (self.wallPrior/(1-self.wallPrior)) * (dist/(1-dist))
+                    self.wall[wallpos] *= (self.wallPrior/(1-self.wallPrior)) * (dist[ranges[i]]/(1-dist[ranges[i]]))
                     if self.pos[wallpos] == 0:
                         self.pos[wallpos] = 1-self.wall[wallpos]
-
+            self.wall.normalize()
+            
             # self.wall[p] *= (self.wallPrior/(1-self.wallPrior)) * p(m[i][j] | zt, xt)/(1-p(m[i][j] | zt, xt)
 
     
