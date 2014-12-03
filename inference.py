@@ -92,10 +92,13 @@ class SLAMParticleFilter(InferenceModule):
         self.pos= util.Counter()
         self.wall = util.Counter()
         for p in legalPositions:
-            self.pos[p] = 0.1
-            self.wall[p] = 0.9
+            self.pos[p] = 0.001
+            self.wall[p] = 0.1
         self.pos[startPos] = 1.0
-        self.wall[startPos] = 0.1
+        self.wall[startPos] = 0.001
+        self.permanant = util.Counter()
+        self.pos.normalize()
+        self.wall.normalize()
 
     
     def initialize(self):
@@ -336,7 +339,7 @@ class SLAMParticleFilter(InferenceModule):
                             if val == 1:
                                 # print dist
                                 # print p, i, ranges[i],val
-                                self.wall[wallpos] += 0.1
+                                self.permanant[wallpos] += 0.1*self.pos[wallpos]
                             else:
                                 self.wall[wallpos] += self.wall[wallpos]*(self.wallPrior/float(1-self.wallPrior)) * (val/float(1-val))
                     elif i == 1:
@@ -350,7 +353,7 @@ class SLAMParticleFilter(InferenceModule):
                             if val == 1:
                                 # print dist
                                 # print p, i, ranges[i],val
-                                self.wall[wallpos] += 0.1
+                                self.permanant[wallpos] += 0.1*self.pos[wallpos]
                             else:
                                 self.wall[wallpos] += self.wall[wallpos]*(self.wallPrior/float(1-self.wallPrior)) * (val/float(1-val))
                     elif i == 2:
@@ -364,7 +367,7 @@ class SLAMParticleFilter(InferenceModule):
                             if val == 1:
                                 # print dist
                                 # print p, i, ranges[i],val
-                                self.wall[wallpos] += 0.1
+                                self.permanant[wallpos] += 0.1*self.pos[wallpos]
                             else:
                                 self.wall[wallpos] += self.wall[wallpos]*(self.wallPrior/float(1-self.wallPrior)) * (val/float(1-val))
                     elif i == 3:
@@ -378,7 +381,7 @@ class SLAMParticleFilter(InferenceModule):
                             if val == 1:
                                 # print dist
                                 # print p, i, ranges[i],val
-                                self.wall[wallpos] += 0.1
+                                self.permanant[wallpos] += 0.1*self.pos[wallpos]
                             else:
                                 self.wall[wallpos] += self.wall[wallpos]*(self.wallPrior/float(1-self.wallPrior)) * (val/float(1-val))
             else:
@@ -419,8 +422,8 @@ class SLAMParticleFilter(InferenceModule):
         #     beliefs[pos] = 0.1
         # beliefs[(3,4)]=0
         # print beliefs
-        # for key in self.permanant:
-        #     self.wall[key]=1
+        for key in self.permanant:
+            self.wall[key]=self.permanant[key]
 
         return self.wall
     
