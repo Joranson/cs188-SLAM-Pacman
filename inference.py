@@ -81,20 +81,35 @@ class SLAMParticleFilter(InferenceModule):
         self.layoutWidth = layoutWidth
         self.wallPrior = wallPrior
         self.numParticles = numParticles
+        self.permanant = util.Counter()
+
+        self.particles = []
+        random.shuffle(legalPositions)
+        myList = itertools.cycle(legalPositions)
+        self.particles = [myList.next() for i in range(0, numParticles)]
+        self.particless = self.particles
 
         self.pos= util.Counter()
         self.wall = util.Counter()
         for p in legalPositions:
-            self.pos[p] = 0.3
-            self.wall[p] = 0.0
-        self.pos[startPos] = 0.2
-        self.wall[startPos] = 0
-        self.time = 0
+            self.pos[p] = 0.001
+            self.wall[p] = 0.1
+        self.pos[startPos] = 1.0
+        self.wall[startPos] = 0.001
+        self.permanant = util.Counter()
+        self.pos.normalize()
+        self.wall.normalize()
 
     
     def initialize(self):
         "*** YOU OVERWRITE THIS METHOD HOWEVER YOU WANT ***"
-        pass
+        # pass
+        print 'initializinggggggg'
+        self.particles = []
+        random.shuffle(legalPositions)
+        myList = itertools.cycle(legalPositions)
+        self.particles = [myList.next() for i in range(0, numParticles)]
+
         
     def inRange(self, direction, pos):
         if direction==Directions.NORTH:
@@ -116,14 +131,17 @@ class SLAMParticleFilter(InferenceModule):
         else:
             return True
 
+    def updateDist(self, counter, sonarVal, myrange, p):
+        new = util.Counter()
+        for key in counter:
+            val = counter[key]
+            if key >= abs(sonarVal) and key+p in range(myrange):
+                new[key] = val
+        new.normalize()
+        return new
 
     def observe(self, prevAction, ranges):
         "*** YOU OVERWRITE THIS METHOD HOWEVER YOU WANT ***"
-        # pass
-        # if self.time==0:
-        #     print prevAction
-        self.time += 1
-
         ## iterate through all possible pacman positions, vague
         for p in self.legalPositions:
             center = self.pos[p]
@@ -261,7 +279,7 @@ class SLAMParticleFilter(InferenceModule):
                     newPos=list(p)
                     newPos[0]+=1
                     newPos=tuple(newPos)
-                    self.pos[newPos] += center * 0.9
+                    self.pos[newPos] += self.pos[p] * 0.9
                 else:
                     self.pos[p] += center * 0.9
 
@@ -301,40 +319,101 @@ class SLAMParticleFilter(InferenceModule):
                     self.pos[p] += center * 0.025
 
                 self.pos[p] += center*0.9
-        self.pos.normalize()
+        
 
-        # update walls based on range, further degrade possibilities if pacman position collides with wall position
+        ## update walls based on range, further degrade possibilities if pacman position collides with wall position
         for p in self.legalPositions:
-            pacman_position_p = self.pos[p]
-            for i in range(4):
-                dist = slam.getObservationDistribution(ranges[i])
-                # print dist
-                if i == 0:
-                    wallpos = (p[0],p[1]+ranges[0])
-                    # print self.wall[wallpos]
-                    # print (self.wallPrior/(1-self.wallPrior)) * (dist/(1-dist))
-                    self.wall[wallpos] *= (self.wallPrior/(1-self.wallPrior)) * (dist[ranges[i]]/(1-dist[ranges[i]]))
-
-                    # if self.pos[wallpos] == 0:
-                    #     self.pos[wallpos] = 1-self.wall[wallpos]
-                elif i == 1:
-                    wallpos = (p[0]+ranges[1],p[1])
-                    self.wall[wallpos] *= (self.wallPrior/(1-self.wallPrior)) * (dist[ranges[i]]/(1-dist[ranges[i]]))
-                    # if self.pos[wallpos] == 0:
-                    #     self.pos[wallpos] = 1-self.wall[wallpos]
-                elif i == 2:
-                    wallpos = (p[0],p[1]-ranges[2])
-                    self.wall[wallpos] *= (self.wallPrior/(1-self.wallPrior)) * (dist[ranges[i]]/(1-dist[ranges[i]]))
-                    if self.pos[wallpos] == 0:
-                        self.pos[wallpos] = 1-self.wall[wallpos]
-                elif i == 3:
-                    wallpos = (p[0]-ranges[3],p[0])
-                    self.wall[wallpos] *= (self.wallPrior/(1-self.wallPrior)) * (dist[ranges[i]]/(1-dist[ranges[i]]))
-                    if self.pos[wallpos] == 0:
-                        self.pos[wallpos] = 1-self.wall[wallpos]
+            if (p[0]-ranges[3] in range(self.layoutWidth)) and (p[0]+ranges[1] in range(self.layoutWidth)) and (p[1]+ranges[0] in range(self.layoutHeight)) and (p[1]-ranges[2] in range(self.layoutHeight)):
+                for i in range(4):
+                    dists = slam.getObservationDistribution(ranges[i])
+                    if i == 0:
+                        # for j in range(ranges[i]):
+                        #     self.wall[(p[0],p[1]+j)] -=
+                        dist = self.updateDist(dists, ranges[i], self.layoutHeight, p[1])
+                        for key in dist:
+                            val = dist[key]
+                            # print dists
+                            # print dist
+                            # print p, i, ranges[i],val
+                            wallpos = (p[0],p[1]+key)
+                            if val == 1:
+                                # print dist
+                                # print p, i, ranges[i],val
+                                self.permanant[wallpos] += 0.5*self.pos[wallpos]
+                            else:
+                                self.wall[wallpos] += self.wall[wallpos]*(self.wallPrior/float(1-self.wallPrior)) * (val/float(1-val))
+                    elif i == 1:
+                        dist = self.updateDist(dists, ranges[i], self.layoutWidth, p[0])
+                        for key in dist:
+                            val = dist[key]
+                            # print dists
+                            # print dist
+                            # print p, i, ranges[i],val
+                            wallpos = (p[0]+key,p[1])
+                            if val == 1:
+                                # print dist
+                                # print p, i, ranges[i],val
+                                self.permanant[wallpos] += 0.5*self.pos[wallpos]
+                            else:
+                                self.wall[wallpos] += self.wall[wallpos]*(self.wallPrior/float(1-self.wallPrior)) * (val/float(1-val))
+                    elif i == 2:
+                        dist = self.updateDist(dists, -ranges[i], self.layoutHeight, p[1])
+                        for key in dist:
+                            val = dist[key]
+                            # print dists
+                            # print dist
+                            # print p, i, ranges[i],val
+                            wallpos = (p[0],p[1]-key)
+                            if val == 1:
+                                # print dist
+                                # print p, i, ranges[i],val
+                                self.permanant[wallpos] += 0.5*self.pos[wallpos]
+                            else:
+                                self.wall[wallpos] += self.wall[wallpos]*(self.wallPrior/float(1-self.wallPrior)) * (val/float(1-val))
+                    elif i == 3:
+                        dist = self.updateDist(dists, -ranges[i], self.layoutWidth, p[0])
+                        for key in dist:
+                            val = dist[key]
+                            # print dists
+                            # print dist
+                            # print p, i, ranges[i],val
+                            wallpos = (p[0]-key,p[0])
+                            if val == 1:
+                                # print dist
+                                # print p, i, ranges[i],val
+                                self.permanant[wallpos] += 0.5*self.pos[wallpos]
+                            else:
+                                self.wall[wallpos] += self.wall[wallpos]*(self.wallPrior/float(1-self.wallPrior)) * (val/float(1-val))
+            else:
+                self.pos[p] = 0
             self.wall.normalize()
             
+            self.pos.normalize()
+
+        # self.particless = []
+        # if self.wall.totalCount() == 0:
+        #     self.initialize()
+        # else: 
+        #     for i in range(self.numParticles):
+        #         # self.particles.append(util.sample(self.pos))
+        #         p = util.sample(self.wall)
+        #         if p != 0:
+        #             self.particless.append(p)
+
+
+
+        # new = []
+        # for i in range(self.numParticles):
+        #     newPosDist = self.pos
+        #     p = util.sample(newPosDist)
+        #     if p != 0:
+        #         new.append(p)
+        # self.legalPositions = new
+
+            
+
             # self.wall[p] *= (self.wallPrior/(1-self.wallPrior)) * p(m[i][j] | zt, xt)/(1-p(m[i][j] | zt, xt)
+
     
     def getWallBeliefDistribution(self):
         "*** YOU OVERWRITE THIS METHOD HOWEVER YOU WANT ***"
@@ -343,6 +422,9 @@ class SLAMParticleFilter(InferenceModule):
         #     beliefs[pos] = 0.1
         # beliefs[(3,4)]=0
         # print beliefs
+        for key in self.permanant:
+            self.wall[key]=self.permanant[key]
+
         return self.wall
     
     def getPositionBeliefDistribution(self):
@@ -353,4 +435,3 @@ class SLAMParticleFilter(InferenceModule):
         # beliefs.normalize()
         # print beliefs
         return self.pos
-
