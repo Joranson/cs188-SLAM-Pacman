@@ -85,9 +85,9 @@ class SLAMParticleFilter(InferenceModule):
         self.pos= util.Counter()
         self.wall = util.Counter()
         for p in legalPositions:
-            self.pos[p] = 0
-            self.wall[p] = 1
-        self.pos[startPos] = 1
+            self.pos[p] = 0.3
+            self.wall[p] = 0.0
+        self.pos[startPos] = 0.2
         self.wall[startPos] = 0
         self.time = 0
 
@@ -98,19 +98,19 @@ class SLAMParticleFilter(InferenceModule):
         
     def inRange(self, direction, pos):
         if direction==Directions.NORTH:
-            if (pos[1]+1) in range(self.layoutHeight+1):
+            if (pos[1]+1) in range(self.layoutHeight):
                 return True
             return False
         elif direction==Directions.SOUTH:
-            if (pos[1]-1) in range(self.layoutHeight+1):
+            if (pos[1]-1) in range(self.layoutHeight):
                 return True
             return False
         elif direction==Directions.WEST:
-            if (pos[0]-1) in range(self.layoutWidth+1):
+            if (pos[0]-1) in range(self.layoutWidth):
                 return True
             return False
         elif direction==Directions.EAST:
-            if (pos[0]+1) in range(self.layoutWidth+1):
+            if (pos[0]+1) in range(self.layoutWidth):
                 return True
             return False
         else:
@@ -120,8 +120,8 @@ class SLAMParticleFilter(InferenceModule):
     def observe(self, prevAction, ranges):
         "*** YOU OVERWRITE THIS METHOD HOWEVER YOU WANT ***"
         # pass
-        if self.time==0:
-            print prevAction
+        # if self.time==0:
+        #     print prevAction
         self.time += 1
 
         ## iterate through all possible pacman positions, vague
@@ -132,7 +132,7 @@ class SLAMParticleFilter(InferenceModule):
                     newPos=list(p)
                     newPos[1]+=1
                     newPos=tuple(newPos)
-                    self.pos[newPos] = self.pos[p] * 0.9
+                    self.pos[newPos] += center * 0.9
                 else:
                     self.pos[p] += center * 0.9
 
@@ -140,7 +140,7 @@ class SLAMParticleFilter(InferenceModule):
                     newPos=list(p)
                     newPos[1]-=1
                     newPos=tuple(newPos)
-                    self.pos[newPos] = center * 0.025
+                    self.pos[newPos] += center * 0.025
                 else:
                     self.pos[p] += center*0.025
 
@@ -148,7 +148,7 @@ class SLAMParticleFilter(InferenceModule):
                     newPos=list(p)
                     newPos[0]-=1
                     newPos=tuple(newPos)
-                    self.pos[newPos] = center * 0.025
+                    self.pos[newPos] += center * 0.025
                 else:
                     self.pos[p] += center*0.025
 
@@ -156,7 +156,7 @@ class SLAMParticleFilter(InferenceModule):
                     newPos=list(p)
                     newPos[0]+=1
                     newPos=tuple(newPos)
-                    self.pos[newPos] = center * 0.025
+                    self.pos[newPos] += center * 0.025
                 else:
                     self.pos[p] += center*0.025
 
@@ -167,7 +167,7 @@ class SLAMParticleFilter(InferenceModule):
                     newPos=list(p)
                     newPos[1]+=1
                     newPos=tuple(newPos)
-                    self.pos[newPos] = center * 0.025
+                    self.pos[newPos] += center * 0.025
                 else:
                     self.pos[p] += center * 0.025
 
@@ -175,7 +175,7 @@ class SLAMParticleFilter(InferenceModule):
                     newPos=list(p)
                     newPos[1]-=1
                     newPos=tuple(newPos)
-                    self.pos[newPos] = self.pos[p] * 0.9
+                    self.pos[newPos] += center * 0.9
                 else:
                     self.pos[p] += center * 0.9
 
@@ -183,7 +183,7 @@ class SLAMParticleFilter(InferenceModule):
                     newPos=list(p)
                     newPos[0]-=1
                     newPos=tuple(newPos)
-                    self.pos[newPos] = center * 0.025
+                    self.pos[newPos] += center * 0.025
                 else:
                     self.pos[p] += center*0.025
 
@@ -191,7 +191,7 @@ class SLAMParticleFilter(InferenceModule):
                     newPos=list(p)
                     newPos[0]+=1
                     newPos=tuple(newPos)
-                    self.pos[newPos] = center * 0.025
+                    self.pos[newPos] += center * 0.025
                 else:
                     self.pos[p] += center*0.025
 
@@ -202,7 +202,7 @@ class SLAMParticleFilter(InferenceModule):
                     newPos=list(p)
                     newPos[1]+=1
                     newPos=tuple(newPos)
-                    self.pos[newPos] = center * 0.025
+                    self.pos[newPos] += center * 0.025
                 else:
                     self.pos[p] += center * 0.025
 
@@ -210,7 +210,7 @@ class SLAMParticleFilter(InferenceModule):
                     newPos=list(p)
                     newPos[1]-=1
                     newPos=tuple(newPos)
-                    self.pos[newPos] = center * 0.025
+                    self.pos[newPos] += center * 0.025
                 else:
                     self.pos[p] += center * 0.025
 
@@ -218,7 +218,7 @@ class SLAMParticleFilter(InferenceModule):
                     newPos=list(p)
                     newPos[0]-=1
                     newPos=tuple(newPos)
-                    self.pos[newPos] = self.pos[p] * 0.9
+                    self.pos[newPos] += center * 0.9
                 else:
                     self.pos[p] += center * 0.9
 
@@ -226,7 +226,7 @@ class SLAMParticleFilter(InferenceModule):
                     newPos=list(p)
                     newPos[0]+=1
                     newPos=tuple(newPos)
-                    self.pos[newPos] = center * 0.025
+                    self.pos[newPos] += center * 0.025
                 else:
                     self.pos[p] += center*0.025
 
@@ -237,7 +237,7 @@ class SLAMParticleFilter(InferenceModule):
                     newPos=list(p)
                     newPos[1]+=1
                     newPos=tuple(newPos)
-                    self.pos[newPos] = center * 0.025
+                    self.pos[newPos] += center * 0.025
                 else:
                     self.pos[p] += center * 0.025
 
@@ -245,7 +245,7 @@ class SLAMParticleFilter(InferenceModule):
                     newPos=list(p)
                     newPos[1]-=1
                     newPos=tuple(newPos)
-                    self.pos[newPos] = center * 0.025
+                    self.pos[newPos] += center * 0.025
                 else:
                     self.pos[p] += center * 0.025
 
@@ -253,7 +253,7 @@ class SLAMParticleFilter(InferenceModule):
                     newPos=list(p)
                     newPos[0]-=1
                     newPos=tuple(newPos)
-                    self.pos[newPos] = center * 0.025
+                    self.pos[newPos] += center * 0.025
                 else:
                     self.pos[p] += center * 0.025
 
@@ -261,7 +261,7 @@ class SLAMParticleFilter(InferenceModule):
                     newPos=list(p)
                     newPos[0]+=1
                     newPos=tuple(newPos)
-                    self.pos[newPos] = self.pos[p] * 0.9
+                    self.pos[newPos] += center * 0.9
                 else:
                     self.pos[p] += center * 0.9
 
@@ -272,7 +272,7 @@ class SLAMParticleFilter(InferenceModule):
                     newPos=list(p)
                     newPos[1]+=1
                     newPos=tuple(newPos)
-                    self.pos[newPos] = center * 0.025
+                    self.pos[newPos] += center * 0.025
                 else:
                     self.pos[p] += center * 0.025
 
@@ -280,7 +280,7 @@ class SLAMParticleFilter(InferenceModule):
                     newPos=list(p)
                     newPos[1]-=1
                     newPos=tuple(newPos)
-                    self.pos[newPos] = center * 0.025
+                    self.pos[newPos] += center * 0.025
                 else:
                     self.pos[p] += center * 0.025
 
@@ -288,7 +288,7 @@ class SLAMParticleFilter(InferenceModule):
                     newPos=list(p)
                     newPos[0]-=1
                     newPos=tuple(newPos)
-                    self.pos[newPos] = center * 0.025
+                    self.pos[newPos] += center * 0.025
                 else:
                     self.pos[p] += center * 0.025
 
@@ -296,22 +296,44 @@ class SLAMParticleFilter(InferenceModule):
                     newPos=list(p)
                     newPos[0]+=1
                     newPos=tuple(newPos)
-                    self.pos[newPos] = center * 0.025
+                    self.pos[newPos] += center * 0.025
                 else:
                     self.pos[p] += center * 0.025
 
                 self.pos[p] += center*0.9
         self.pos.normalize()
 
-        ## update walls based on range, further degrade possibilities if pacman position collides with wall position
+        # update walls based on range, further degrade possibilities if pacman position collides with wall position
         for p in self.legalPositions:
             pacman_position_p = self.pos[p]
             for i in range(4):
-                # print "range r:----------->", r
                 dist = slam.getObservationDistribution(ranges[i])
-                # if i == 0:
-                    
-       
+                # print dist
+                if i == 0:
+                    wallpos = (p[0],p[1]+ranges[0])
+                    # print self.wall[wallpos]
+                    # print (self.wallPrior/(1-self.wallPrior)) * (dist/(1-dist))
+                    self.wall[wallpos] *= (self.wallPrior/(1-self.wallPrior)) * (dist[ranges[i]]/(1-dist[ranges[i]]))
+
+                    # if self.pos[wallpos] == 0:
+                    #     self.pos[wallpos] = 1-self.wall[wallpos]
+                elif i == 1:
+                    wallpos = (p[0]+ranges[1],p[1])
+                    self.wall[wallpos] *= (self.wallPrior/(1-self.wallPrior)) * (dist[ranges[i]]/(1-dist[ranges[i]]))
+                    # if self.pos[wallpos] == 0:
+                    #     self.pos[wallpos] = 1-self.wall[wallpos]
+                elif i == 2:
+                    wallpos = (p[0],p[1]-ranges[2])
+                    self.wall[wallpos] *= (self.wallPrior/(1-self.wallPrior)) * (dist[ranges[i]]/(1-dist[ranges[i]]))
+                    if self.pos[wallpos] == 0:
+                        self.pos[wallpos] = 1-self.wall[wallpos]
+                elif i == 3:
+                    wallpos = (p[0]-ranges[3],p[0])
+                    self.wall[wallpos] *= (self.wallPrior/(1-self.wallPrior)) * (dist[ranges[i]]/(1-dist[ranges[i]]))
+                    if self.pos[wallpos] == 0:
+                        self.pos[wallpos] = 1-self.wall[wallpos]
+            self.wall.normalize()
+            
             # self.wall[p] *= (self.wallPrior/(1-self.wallPrior)) * p(m[i][j] | zt, xt)/(1-p(m[i][j] | zt, xt)
     
     def getWallBeliefDistribution(self):
@@ -331,3 +353,4 @@ class SLAMParticleFilter(InferenceModule):
         # beliefs.normalize()
         # print beliefs
         return self.pos
+
