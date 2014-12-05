@@ -223,16 +223,18 @@ class SLAMParticleFilter(InferenceModule):
                     particle.walls[wallpos]=1
                 else:
                     particle.walls[wallpos] *= (float(1-self.wallPrior)/self.wallPrior) * (val/float(1-val))
+                    # particle.walls[wallpos] = val
+                    particle.importance += 0.25                      ## need to change!!!!!
+
                 if particle.walls[wallpos]>=1:
                     particle.walls[wallpos]=1
-            particle.importance += 0.1                      ## need to change!!!!!
+                if (particle.walls[wallpos]==1) and (wallpos in particle.path):
+                    particle.importance = 0
 
         if (pacman_pos[0]-ranges[3] not in range(self.layoutWidth)) or (pacman_pos[0]+ranges[1] not in range(self.layoutWidth)) or (pacman_pos[1]+ranges[0] not in range(self.layoutHeight)) or (pacman_pos[1]-ranges[2] not in range(self.layoutHeight)):
             particle.importance = 0
         if particle.walls[pacman_pos]==1:
             particle.importance = 0
-
-
 
 
     def resampleParticles(self):
@@ -253,13 +255,11 @@ class SLAMParticleFilter(InferenceModule):
                     indicator = True
                     break
                 destiny = random.random()
-                newparticles.append(particle.Particle())            ## need to use new particles
+                newparticles.append(copy.deepcopy(cop[i]))            ## need to use new particles
             if indicator:
                 break
         return newparticles
 
-
-        
     
     def getWallBeliefDistribution(self):
         "*** YOU OVERWRITE THIS METHOD HOWEVER YOU WANT ***"
@@ -278,6 +278,12 @@ class SLAMParticleFilter(InferenceModule):
         N = len(self.particles)
         for i in range(N):
             pos[self.particles[i].path[-1]] += self.particles[i].importance
+        for i in range(self.layoutWidth):
+            pos[(i,0)]=0
+            pos[(i,self.layoutHeight-1)]=0
+        for j in range(self.layoutHeight):
+            pos[(0,j)]=0
+            pos[(self.layoutWidth-1, j)]=0
         pos.normalize()
         # print pos
         return pos
