@@ -6,5 +6,5 @@ class Particle():
 		self.importance = 0
 		for i in range(w):
 			for j in range(h):
-				self.walls[i,j]=prior
+				self.walls[(i,j)]=prior
 		self.walls[startPos]=0
