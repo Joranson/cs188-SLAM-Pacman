@@ -89,9 +89,6 @@ class SLAMParticleFilter(InferenceModule):
             self.particles.append(particle.Particle(startPos, layoutHeight, layoutWidth, wallPrior))
         self.resam = 0
 
-    # def initialize(self, particle):
-    #     for i in range(self.numParticles):
-
 
     def rand(self, i, new):
         r = random.randint(1,1000)
@@ -160,7 +157,6 @@ class SLAMParticleFilter(InferenceModule):
             i=4
         self.updateEach(ranges, i)
         self.resampleParticles()
-        # print "sample number: ", self.resam
         self.resam += 1
 
     def updateEach(self, ranges, i):
@@ -180,72 +176,34 @@ class SLAMParticleFilter(InferenceModule):
             # Update this particle:
             self.updateParticle(p, ranges)
 
-    # def updateDist(self, counter, wallOffset, i, pacman_pos):
-    #     myrange = self.layoutHeight if (i==0) or (i==2) else self.layoutWidth
-    #     sonarVal = wallOffset[1] if (i==0) or (i==2) else wallOffset[0]
-    #     p = pacman_pos[1] if (i==0) or (i==2) else pacman_pos[0]
-    #     new = util.Counter()
-    #     for key in counter:
-    #         val = counter[key]
-    #         if key >= abs(sonarVal) and key+p in range(myrange):
-    #             new[key] = val
-    #     new.normalize()
-    #     return new
+    def ratio(self, particle):
+        rt = 1-len(set(particle.path))/(self.layoutWidth*self.layoutHeight-round(self.wallPrior*self.layoutWidth*self.layoutHeight, 0))
+        if rt<=0:
+            rt=0.00001
+        return rt
+
 
 
     def updateParticle(self, particle, ranges):
         pacman_pos = (particle.path[-1][0], particle.path[-1][1])
         for i in range(4):
-            # dists = slam.getObservationDistribution(ranges[i])
-            # if i==0:
-            #     wallOffset = (0, ranges[i])
-            # elif i==1:
-            #     wallOffset = (ranges[i], 0)
-            # elif i==2:
-            #     wallOffset = (0, -ranges[i])
-            # elif i==3:
-            #     wallOffset = (-ranges[i], 0)
-            # dist = self.updateDist(dists, wallOffset, i, pacman_pos)
-
             for ii in range(ranges[i]):
                 if i==0:
-                    particle.walls[pacman_pos[0], pacman_pos[1]+ii]-=0.3
+                    particle.walls[pacman_pos[0], pacman_pos[1]+ii]-=self.ratio(particle)*0.3
                     if particle.walls[pacman_pos[0], pacman_pos[1]+ii] < 0:
                         particle.walls[pacman_pos[0], pacman_pos[1]+ii] = 0
                 elif i==1:
-                    particle.walls[pacman_pos[0]+ii, pacman_pos[1]]-=0.3
+                    particle.walls[pacman_pos[0]+ii, pacman_pos[1]]-=self.ratio(particle)*0.3
                     if particle.walls[pacman_pos[0]+ii, pacman_pos[1]] < 0:
                         particle.walls[pacman_pos[0]+ii, pacman_pos[1]] = 0
                 elif i==2:
-                    particle.walls[pacman_pos[0], pacman_pos[1]-ii]-=0.3
+                    particle.walls[pacman_pos[0], pacman_pos[1]-ii]-=self.ratio(particle)*0.3
                     if particle.walls[pacman_pos[0], pacman_pos[1]-ii] < 0:
                         particle.walls[pacman_pos[0], pacman_pos[1]-ii] = 0
                 else:
-                    particle.walls[pacman_pos[0]-ii, pacman_pos[1]]-=0.3
+                    particle.walls[pacman_pos[0]-ii, pacman_pos[1]]-=self.ratio(particle)*0.3
                     if particle.walls[pacman_pos[0]-ii, pacman_pos[1]] < 0:
                         particle.walls[pacman_pos[0]-ii, pacman_pos[1]] = 0
-
-            # for key in dist:
-            #     val = dist[key]
-            #     if i==0:
-            #         wallpos = (pacman_pos[0],pacman_pos[1]+key)
-            #     elif i==1:
-            #         wallpos = (pacman_pos[0]+key,pacman_pos[1])
-            #     elif i==2:
-            #         wallpos = (pacman_pos[0],pacman_pos[1]-key)
-            #     else:
-            #         wallpos = (pacman_pos[0]-key,pacman_pos[1])
-            #     if val == 1:
-            #         particle.walls[wallpos]=1
-            #     else:
-            #         particle.walls[wallpos] *= (float(1-self.wallPrior)/self.wallPrior) * (val/float(1-val))
-            #         # particle.walls[wallpos] = val
-            #         # particle.importance += 0.25                      ## need to change!!!!!
-
-            #     if particle.walls[wallpos]>=1:
-            #         particle.walls[wallpos]=1
-            #     if (particle.walls[wallpos]==1) and (wallpos in particle.path):
-            #         particle.importance = 0
 
             if i==0:
                 wallpos = (pacman_pos[0],pacman_pos[1]+ranges[i])
@@ -255,11 +213,11 @@ class SLAMParticleFilter(InferenceModule):
                 wallpos = (pacman_pos[0],pacman_pos[1]-ranges[i])
             else:
                 wallpos = (pacman_pos[0]-ranges[i],pacman_pos[1])
-            # print "here"
 
-            particle.walls[wallpos] += 0.1
+            particle.walls[wallpos] += 0.1*self.ratio(particle)
             if particle.walls[wallpos] > 1:
                 particle.walls[wallpos] = 1
+
 
             if i==0:
                 if (pacman_pos[1]+ranges[0]) in range(self.layoutHeight):
@@ -285,18 +243,10 @@ class SLAMParticleFilter(InferenceModule):
                 else:
                     particle.importance = 0
                     break
-        
-        # if particle.walls[particle.path[-2]]==1:
-        #     # print "reached here!", particle.path[-2]
-        #     # print particle.walls
-        #     particle.importance = 0.5
 
 
     def resampleParticles(self):
-        # print "Before resampling: "
-        # self.printParticleImportance()
         N = len(self.particles)
-        # ssss = sum(p.importance for p in self.particles)
         newparticles = []
         cop = []
         for i in range(N):
@@ -307,13 +257,12 @@ class SLAMParticleFilter(InferenceModule):
                 newparticles.append(copy.deepcopy(particle))
         while len(newparticles)<N:
             indicator = False
-            # print "len cop:", len(cop)
             for i in range(len(cop)):
                 if len(newparticles) >= N:
                     indicator = True
                     break
                 destiny = random.random()
-                newparticles.append(copy.deepcopy(cop[i]))            ## need to use new particles
+                newparticles.append(copy.deepcopy(cop[i]))            ## need to add new selected particles
             if len(cop)==0:
                 newparticles = copy.deepcopy(self.particles)
                 for p in newparticles:
@@ -325,21 +274,21 @@ class SLAMParticleFilter(InferenceModule):
     
     def getWallBeliefDistribution(self):
         "*** YOU OVERWRITE THIS METHOD HOWEVER YOU WANT ***"
-        walls=util.Counter()
+        self.walls=util.Counter()
         N = len(self.particles)
         for i in range(N):
             for legalPosition in self.legalPositions:
-                walls[legalPosition]+=self.particles[i].walls[legalPosition]
+                self.walls[legalPosition]+=self.particles[i].walls[legalPosition]
         for legalPosition in self.legalPositions:
-            walls[legalPosition] /= float(self.numParticles)
-        return walls
+            self.walls[legalPosition] /= float(self.numParticles)
+        return self.walls
     
     def getPositionBeliefDistribution(self):
         "*** YOU OVERWRITE THIS METHOD HOWEVER YOU WANT ***"
         pos=util.Counter()
         N = len(self.particles)
         for i in range(N):
-            pos[self.particles[i].path[-1]] += self.particles[i].importance
+            pos[self.particles[i].path[-1]] += (self.particles[i].importance)*(1-self.walls[self.particles[i].path[-1]])
         for i in range(self.layoutWidth):
             pos[(i,0)]=0
             pos[(i,self.layoutHeight-1)]=0
@@ -347,11 +296,4 @@ class SLAMParticleFilter(InferenceModule):
             pos[(0,j)]=0
             pos[(self.layoutWidth-1, j)]=0
         pos.normalize()
-        # print pos
         return pos
-
-    # def printParticleImportance(self):
-        # rt = []
-        # for p in self.particles:
-        #     rt.append(p.importance)
-        # print rt 
