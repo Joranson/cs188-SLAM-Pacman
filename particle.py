@@ -4,6 +4,7 @@ class Particle():
 		self.path = [startPos]
 		self.walls = util.Counter()
 		self.importance = 0
+		self.ratio = 1
 		for i in range(w):
 			for j in range(h):
 				self.walls[i,j]=prior
