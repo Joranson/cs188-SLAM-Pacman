@@ -7,5 +7,5 @@ class Particle():
 		self.ratio = 1
 		for i in range(w):
 			for j in range(h):
-				self.walls[i,j]=prior
+				self.walls[(i,j)]=prior
 		self.walls[startPos]=0
