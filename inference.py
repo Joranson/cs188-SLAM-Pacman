@@ -102,7 +102,7 @@ class SLAMParticleFilter(InferenceModule):
         for i in range(numParticles):
             self.particles.append(Particle(startPos, layoutHeight, layoutWidth, wallPrior))
 
-    ## A random generator to mimic Pacman's movement
+
     def rand(self, i, new):
         """
         -parameters: i indicates the direction pacman received, new is the current position of a particle
@@ -181,6 +181,7 @@ class SLAMParticleFilter(InferenceModule):
         self.updateEach(ranges, i)
         self.resampleParticles()
 
+
     def updateEach(self, ranges, i):
         """
         -parameters: ranges is the range measurement, i indicates the direction pacman is supposed to go according
@@ -205,6 +206,7 @@ class SLAMParticleFilter(InferenceModule):
             # Update this particle:
             self.updateParticle(p, ranges)
 
+
     def ratio(self, particle):
         """
         -parameters: this function takes in one particle
@@ -216,7 +218,6 @@ class SLAMParticleFilter(InferenceModule):
         if rt<=0:
             rt=0.01
         return rt
-
 
 
     def updateParticle(self, particle, ranges):
@@ -303,7 +304,7 @@ class SLAMParticleFilter(InferenceModule):
         cop = []
         for i in range(N):
             particle = self.particles[i]
-            if particle.importance==1:
+            if particle.importance>=1:
                 cop.append(copy.deepcopy(particle))
                 newparticles.append(copy.deepcopy(particle))
         while len(newparticles)<N:
@@ -337,6 +338,7 @@ class SLAMParticleFilter(InferenceModule):
             self.walls[legalPosition] /= float(self.numParticles)
         return self.walls
     
+
     def getPositionBeliefDistribution(self):
         """
         We build a new pos Counter, setting all outside pos value of outside wall to 0 and all particles last position to particles'
