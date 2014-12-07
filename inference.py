@@ -21,7 +21,6 @@ import slam
 from game import Directions
 
 import copy, math, random
-import particle
 
 class InferenceModule:
     """
@@ -67,6 +66,17 @@ class InferenceModule:
         of its own position conditioned on all evidence so far.
         """
         pass
+
+class Particle():
+    def __init__(self, startPos, h, w, prior):
+        self.path = [startPos]
+        self.walls = util.Counter()
+        self.importance = 0
+        self.ratio = 1
+        for i in range(w):
+            for j in range(h):
+                self.walls[(i,j)]=prior
+        self.walls[startPos]=0
     
 class SLAMParticleFilter(InferenceModule):
     """
@@ -91,7 +101,7 @@ class SLAMParticleFilter(InferenceModule):
         self.layoutHeight = layoutHeight
         self.layoutWidth = layoutWidth
         for i in range(numParticles):
-            self.particles.append(particle.Particle(startPos, layoutHeight, layoutWidth, wallPrior))
+            self.particles.append(Particle(startPos, layoutHeight, layoutWidth, wallPrior))
         self.resam = 0
 
 
