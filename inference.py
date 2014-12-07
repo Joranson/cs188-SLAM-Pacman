@@ -72,7 +72,6 @@ class Particle():
         self.path = [startPos]
         self.walls = util.Counter()
         self.importance = 0
-        self.ratio = 1
         for i in range(w):
             for j in range(h):
                 self.walls[(i,j)]=prior
@@ -102,9 +101,8 @@ class SLAMParticleFilter(InferenceModule):
         self.layoutWidth = layoutWidth
         for i in range(numParticles):
             self.particles.append(Particle(startPos, layoutHeight, layoutWidth, wallPrior))
-        self.resam = 0
 
-
+    ## A random generator to mimic Pacman's movement
     def rand(self, i, new):
         """
         -parameters: i indicates the direction pacman received, new is the current position of a particle
@@ -182,7 +180,6 @@ class SLAMParticleFilter(InferenceModule):
             i=4
         self.updateEach(ranges, i)
         self.resampleParticles()
-        self.resam += 1
 
     def updateEach(self, ranges, i):
         """
@@ -305,9 +302,8 @@ class SLAMParticleFilter(InferenceModule):
         newparticles = []
         cop = []
         for i in range(N):
-            destiny = random.random()
             particle = self.particles[i]
-            if destiny <= particle.importance:
+            if particle.importance==1:
                 cop.append(copy.deepcopy(particle))
                 newparticles.append(copy.deepcopy(particle))
         while len(newparticles)<N:
@@ -317,7 +313,7 @@ class SLAMParticleFilter(InferenceModule):
                     indicator = True
                     break
                 destiny = random.random()
-                newparticles.append(copy.deepcopy(cop[i]))            ## need to add new selected particles
+                newparticles.append(copy.deepcopy(cop[i]))            ## need to add new filtered particles
             if len(cop)==0:
                 newparticles = copy.deepcopy(self.particles)
                 for p in newparticles:

@@ -18,7 +18,8 @@ how to fix/Improvement: we should use decay/expontial/other mathematical formula
                         are using numbers and formulas generated from intuition and experience here). 
                         Also, pacman's ability to increase/decrease wall distributio should be 
                         expressed in a mathematical formula (i.e. exponential growth/decay, etc) so
-                        that it won't be adding random walls to the map after everything on the map has converged.
+                        that it won't be adding random walls to the map after everything on the 
+                        map has converged.
 
 
 Outside Source: we read a project called simpleSLAM written by researchers in Harvey Mudd 
@@ -26,7 +27,16 @@ Outside Source: we read a project called simpleSLAM written by researchers in Ha
 
                 General Ideas:
                 1) we consider every particle as a Particle Class Object.
-                    Inside Particle object:
+                    Fields inside Particle object:
+                      path: a list recording Pacman's path, we can get Pacman's current position by calling path[-1],
+                            initialized to be [startPos]. Each particle is sure where is its own Pacman.
+                      walls: each particle is assigned a map, using particle.walls to represent the probability of
+                            walls at each position.
+                      importance: using this field to represent the correctness of this particle based on Pacman's 
+                            current position and wall distribution within that specific map. If the importance is 0,
+                            it means this particle
+
+
                     
                 2) -> observe() function gets called every time step. we call updateEach() and resampleParticles() in observe() to update each particle
                       -> updateEach() loops over all the particles in the particle list and update its position using the prevAction.
